@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"	xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd"
+	   default-autowire="byName">
+
+	<context:component-scan base-package="com.water.web"/>
+	<mvc:annotation-driven conversion-service="conversionService">
+		<mvc:message-converters register-defaults="true">
+			<ref bean="stringHttpMessageConverter"/>
+			<ref bean="fastJsonHttpMessageConverter"/>
+			<!--<ref bean="marshallingHttpMessageConverter"/>-->
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	<!--数据格式化工具-->
+	<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+		<property name="converters">
+			<set>
+				<bean class="com.water.web.common.utils.DateConverter"/>
+			</set>
+		</property>
+	</bean>
+
+	<!-- 处理文件上传 -->
+	<!--<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		&lt;!&ndash; one of the properties available; the maximum file size in bytes &ndash;&gt;
+		<property name="defaultEncoding" value="${default.charset}" />
+		<property name="maxUploadSize" value="10485760000" />
+		<property name="maxInMemorySize" value="40960" />
+	</bean>-->
+	<!--  use  Servlet  3.0  based  multipart  parsing(spring mvc3+servlet3上传文件需要配置 需要在web.xml中添加multipart-config片段)  -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver" />
+
+	<!-- 配置spring异常处理 -->
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<!-- 异常默认处理页面 -->
+		<property name="defaultErrorView" value="common/error" />
+		<!-- 指定异常处理页面 -->
+		<property name="exceptionMappings">
+			<props>
+				<prop key="java.lang.ArithmeticException">error/access-denied</prop>
+			</props>
+		</property>
+	</bean>
+	<!-- 基于cookie实现国际化 -->
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+		<property name="cookieName" value="locale" />
+	</bean>
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basenames" value="/assets/i18n/online,/assets/i18n/local" />
+		<property name="cacheSeconds" value="5" />
+	</bean>
+
+	<!-- 静态资源缓存 -->
+	<!--<mvc:resources location="/assets/" mapping="/assets/**" cache-period="864000" />-->
+	<mvc:resources location="/assets/" mapping="/assets/**" cache-period="0" />
+	<!-- 引入视图配置 -->
+	<import resource="spring-config-view.xml"/>
+	<!-- 数据转换器配置 -->
+	<import resource="spring-config-converters.xml"/>
+</beans>

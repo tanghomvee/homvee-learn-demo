@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+  <display-name>51water</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  <!--初始化日志配置文件 -->
+  <context-param>
+    <param-name>logbackConfigLocation</param-name>
+    <param-value>classpath:logback.xml</param-value>
+  </context-param>
+  <listener>
+    <listener-class>ch.qos.logback.ext.spring.web.LogbackConfigListener</listener-class>
+  </listener>
+  <!-- Spring MVC 两种方式
+  1.通过DispatcherServlet加载上下文:
+      DispatcherServlet加载的上下文在每次请求时会放一份在request对象的key为WEB_APPLICATION_CONTEXT_ATTRIBUTE属性中
+      通过RequestContextUtils.getWebApplicationContext(request)或
+      WebApplicationContextUtils.getWebApplicationContext(servletContext,attrname(FrameworkServlet.class.getName() + ".CONTEXT." + getServletName()))
+      方法来获取对应的applicationContext
+      如果通过WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext)来试图获取DispatcherServlet加载的applicationContext时，就会抛出"No WebApplicationContext found: no ContextLoaderListener registered?"的异常
+
+  2.ContextLoaderListener加载的上下:
+      ContextLoaderListener加载的上下文放在ServletContext的key为WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE属性中,
+      可以通过
+      WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext)或
+      WebApplicationContextUtils.getWebApplicationContext(servletContext)或
+      WebApplicationContextUtils.getWebApplicationContext(servletContext,attrname(即上面提到的WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE))
+      方法来获取对应的applicationContext
+
+  -->
+  <!-- 1.通过DispatcherServlet加载上下文-->
+  <!-- <servlet>
+    <servlet-name>springmvc</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>
+          classpath*:net/bull/javamelody/monitoring-spring.xml
+        classpath*:spring/spring-config-mvc.xml
+        classpath*:spring-config-context.xml
+      </param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>springmvc</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping> -->
+  <!-- 2.ContextLoaderListener加载上下,通过DispatcherServlet加载MVC的上下文 -->
+  <!-- 2.1 ContextLoaderListener加载上下 -->
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>
+      classpath*:net/bull/javamelody/monitoring-spring.xml,classpath*:spring-config-context.xml
+    </param-value>
+  </context-param>
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+  <!-- 2.2 通过DispatcherServlet加载MVC的上下文 -->
+  <servlet>
+    <servlet-name>springmvc</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>
+        classpath*:spring/spring-config-mvc.xml
+      </param-value>
+    </init-param>
+    <!--使用Servlet3.0+ 上传文件的配置-->
+    <multipart-config>
+      <!--数字类型，当文件大小超过指定的大小后将写入到硬盘上。默认是0，表示所有大小的文件上传后都会作为一个临时文件写入到硬盘上。-->
+      <file-size-threshold>0</file-size-threshold>
+      <!--指定上传文件存放的目录。当我们指定了location后，
+      我们在调用Part的write(String fileName)方法把文件写入到硬盘的时候可以，文件名称可以不用带路径，但是如果fileName带了绝对路径，那将以fileName所带路径为准把文件写入磁盘。-->
+      <location>./</location>
+      <!--数值类型，表示单个文件的最大大小。默认为-1，表示不限制。当有单个文件的大小超过了max-file-size指定的值时将抛出IllegalStateException异常-->
+      <max-file-size>-1</max-file-size>
+      <!--数值类型，表示一次上传文件的最大大小。默认为-1，表示不限制。当上传时所有文件的大小超过了max-request-size时也将抛出IllegalStateException异常。-->
+      <max-request-size>-1</max-request-size>
+    </multipart-config>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>springmvc</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+
+  <!-- FILTERS -->
+  <!-- 字符编码 -->
+  <filter>
+    <filter-name>EncodingFilter</filter-name>
+    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>EncodingFilter</filter-name>
+    <servlet-name>springmvc</servlet-name>
+  </filter-mapping>
+  <!-- 隐藏Http请求方式 -->
+  <filter>
+    <filter-name>HiddenHttpMethodFilter</filter-name>
+    <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>HiddenHttpMethodFilter</filter-name>
+    <servlet-name>springmvc</servlet-name>
+  </filter-mapping>
+  <!-- 监控工具 -->
+  <filter>
+    <filter-name>javamelody</filter-name>
+    <filter-class>net.bull.javamelody.MonitoringFilter</filter-class>
+    <async-supported>true</async-supported>
+    <init-param>
+      <param-name>authorized-users</param-name>
+      <param-value>homvee:123456</param-value>
+    </init-param>
+    <init-param>
+      <param-name>monitoring-path</param-name>
+      <param-value>/ware-man/monitor</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>javamelody</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>ASYNC</dispatcher>
+  </filter-mapping>
+  <!-- listeners -->
+  <listener>
+    <listener-class>net.bull.javamelody.SessionListener</listener-class>
+  </listener>
+  <!-- 监控数据库 -->
+  <servlet>
+    <servlet-name>DruidStatView</servlet-name>
+    <servlet-class>com.alibaba.druid.support.http.StatViewServlet</servlet-class>
+    <init-param>
+      <param-name>jmxUsername</param-name>
+      <param-value>51water</param-value>
+    </init-param>
+    <init-param>
+      <param-name>jmxPassword</param-name>
+      <param-value>!QAZ2wsx</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>DruidStatView</servlet-name>
+    <url-pattern>/druid/monitor/*</url-pattern>
+  </servlet-mapping>
+
+</web-app>

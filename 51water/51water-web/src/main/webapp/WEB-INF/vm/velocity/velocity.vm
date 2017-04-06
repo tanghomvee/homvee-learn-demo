@@ -1,0 +1,71 @@
+
+		<h1>1.定义变量和使用变量</h1>
+			<h2>定义变量</h2>
+			\#set($maxVal=5.5236)<br>
+			\#set($name="Velocity")<br>
+			\#set($array=["array1","array2"])<br>
+			\#set($template="${maxVal},${name}")<br>
+			\#set($obj.name=$name)<br>
+			\#set($obj.val=${maxVal})<br>
+			#set($maxVal=5.5236)
+			#set($name="Velocity")
+			#set($array=["array1","array2"])
+			#set($template="${maxVal},${name}")
+			#set($obj.name=$name)
+			#set($obj.val=${maxVal})
+			<h2>引用变量</h2>
+			##引用变量
+			\${maxVal}:${maxVal}<br>
+			\${name}:${name}<br>
+			\${array}:${array}<br>
+			\${template}:${template}<br>
+			\${obj}:${obj}<br>
+			\$!{obj}:$!{obj}<br>
+			\${obj.name}:${obj.name}<br>
+			\$!{obj.name}:$!{obj.name}<br>
+			\${obj.val}:${obj.val}<br>
+			\$!{obj.val}:$!{obj.val}<br>
+			<hr>
+			\$obj<br>
+			\$obj.name<br>
+			\$obj.val<br>
+		<h1>2.控制语句</h1>
+		#if($!{array} && ${array.length} > 0)
+			$array
+		#end
+		<h1>3.循环语句</h1>
+		<h1>4.语句的嵌套</h1>
+		<h1>5.关系和逻辑操作符</h1>
+		<h1>6.\#include与\#parse</h1>
+		<h1>10．转义字符'\'的使用</h1>
+		<h1>11．内置对象</h1>
+			Velocity内置了一些对象，在vm模版里可以直接调用，列举如下：
+			$request、$response、$session，另外，模板内还可以使用 $msg内的消息工具访问 Struts 的国际化资源，达到简便实现国际化的方法。
+		<h1>12. 宏定义</h1>
+			①宏的定义
+			\#macro(宏的名称 $参数1 $参数2 …)
+			   语句体(即函数体)
+			\#end
+			②宏的调用
+			\#宏的名称($参数1 $参数2 …)
+			    说明：参数之间用空格隔开。
+	      #macro(testMacro ${param1} ${param2})
+	      	#if($!{param1} && $!{param1} > 0)
+	      		$!{param1}+$!{param2}
+	      	#else	
+	      		$!{param1}-$!{param2}
+	      	#end 
+	      #end
+	      #set($param1=1)
+	      #set($param2=2)
+	      #testMacro(${param1},${param2})
+	      #set($param1=-1)
+	      #testMacro(${param1},${param2})
+		<h1>13. 注释</h1>
+		##this is a single line comment<br>
+		#*<br>
+		Thus begins a multi-line comment. Online visitors won't<br>
+		see this text because the Velocity Templating Engine will<br>
+		ignore it.<br>
+		*#
+
