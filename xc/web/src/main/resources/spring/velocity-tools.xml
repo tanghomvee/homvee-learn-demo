@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tools>
+    <toolbox scope="application">
+        <!--数据转义-->
+        <tool  class="org.apache.velocity.tools.generic.EscapeTool"/>
+    </toolbox>
+   <!-- <toolbox scope="session">
+    </toolbox>
+    <toolbox scope="request">
+    </toolbox>-->
+</tools>

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.homvee.dao.RoleDao" >
+	<!-- 查询列 -->
+	<sql id="QUERY_COLUMN">
+		<![CDATA[
+		role_name AS roleName,
+		id AS               id,
+		yn AS yn,
+		create_time AS createTime,
+		modify_time AS modifyTime
+		]]>
+	</sql>
+	
+	<sql id="TABLE_NAME"><![CDATA[t_role]]></sql>
+	<!-- 查询表 -->
+	<sql id="FROM_TABLE">
+		<![CDATA[FROM]]>
+		<include refid="TABLE_NAME"/>
+	</sql>
+	<!-- 智能排序与分页 -->
+	<sql id="ORDER_LIMIT">
+		<if test="orderFields != null and orderFields.size() > 0">
+			<![CDATA[ ORDER BY ]]>
+			<foreach collection="orderFields" index="orderField"  item="orderType" separator=",">
+			<![CDATA[ #{orderField} #{orderType} ]]>
+			</foreach>
+		</if>
+		<if test="startIndex != null and startIndex &gt;= 0 and pageSize != null and pageSize &gt; 0"><![CDATA[LIMIT #{startIndex},#{pageSize}]]></if>
+	</sql>
+	<!-- 全部条件 -->
+	<sql id="WHERE">
+		<where>
+			<![CDATA[AND yn != -1]]>
+			<if test="id != null and id != ''"><![CDATA[ AND id = #{id}]]></if>
+			<if test="roleName != null and roleName !=''"><![CDATA[ AND role_name LIKE CONCAT('%', #{roleName}, '%')]]></if>
+			<if test="createTime != null and createTime != ''"><![CDATA[ AND create_time = #{createTime}]]></if>
+			<if test="modifyTime != null and modifyTime != ''"><![CDATA[ AND modify_time = #{modifyTime}]]></if>
+		</where>
+	</sql>
+	<!-- 更新列字段,只要不为NULL则更新,除开主键列 -->
+	<sql id="SET">
+		<set>
+			<![CDATA[modify_time = now()]]>
+			<if test="roleName != null and roleName !=''"><![CDATA[,role_name = #{roleName}]]></if>
+			<if test="yn == 1 or yn==-1"><![CDATA[,yn = #{yn}]]></if>
+		</set>
+	</sql>
+	<!-- 基础逻辑SQL -->
+	<!-- 保存数据 -->
+	<insert id="saveEntry" parameterType="Role" useGeneratedKeys="true" keyProperty="id">
+		<![CDATA[INSERT INTO]]>
+		<include refid="TABLE_NAME"/>
+		<![CDATA[(`role_name`) VALUES(#{roleName})]]>
+	</insert>
+	<!-- 通过主键删除数据 -->
+	<delete id="deleteByKey" parameterType="java.lang.reflect.Array">
+		<![CDATA[DELETE]]> 
+		<include refid="FROM_TABLE"/>
+		<![CDATA[WHERE id IN]]>
+		<foreach collection="array" item="id" open="(" separator="," close=")">
+			<![CDATA[#{id}]]>
+		</foreach>
+	</delete>
+	<!-- 通过条件删除数据 -->
+	<delete id="deleteByCondition" parameterType="Role">
+		<![CDATA[DELETE]]> 
+		<include refid="FROM_TABLE"/>
+		<include refid="WHERE"/>
+	</delete>
+	<!-- 通过主键修改数据 -->
+	<update id="modifyByKey" parameterType="Role">
+		<![CDATA[UPDATE]]> 
+		<include refid="TABLE_NAME"/>
+		<include refid="SET"/>
+		<![CDATA[WHERE yn=1 AND id=#{id}]]> 
+	</update>
+	<!-- 按主键 查询对象 -->
+	<select id="queryEntryListByKey" parameterType="java.lang.reflect.Array" resultType="Role">
+		<![CDATA[SELECT]]>
+		<include refid="QUERY_COLUMN"/>
+		<include refid="FROM_TABLE"/>
+		<![CDATA[WHERE yn=1 and id IN ]]>
+		<foreach collection="array" item="id" open="(" separator="," close=")">
+			<![CDATA[#{id}]]>
+		</foreach>
+	</select>
+	<!-- 按条件 查询对象 -->
+	<select id="queryEntryListByCondition" parameterType="Role" resultType="Role">
+		<![CDATA[SELECT]]>
+		<include refid="QUERY_COLUMN"/>
+		<include refid="FROM_TABLE"/>
+		<include refid="WHERE"/>
+		<include refid="ORDER_LIMIT"/>
+	</select>
+	<!-- 按条件 查询对象个数 -->
+	<select id="queryEntryListCntByCondition" parameterType="Role" resultType="int">
+		<![CDATA[SELECT COUNT(1) AS cnt ]]>
+		<include refid="FROM_TABLE"/>
+		<include refid="WHERE"/>
+	</select>
+	<!-- 通过主键数组,逻辑删除数据 -->
+	<update id="logicDelByKey" parameterType="java.lang.reflect.Array" >
+		<![CDATA[UPDATE]]>
+		<include refid="TABLE_NAME"/>
+		<![CDATA[SET yn=-1,modify_time=NOW()]]>
+		<![CDATA[WHERE yn=1 AND id IN]]>
+		<foreach collection="array" item="id" open="(" separator="," close=")">
+			<![CDATA[#{id}]]>
+		</foreach>
+	</update>
+	<!-- 通过条件,逻辑删除数据 -->
+	<update id="logicDelByCondition" parameterType="Role" >
+		<![CDATA[UPDATE]]>
+		<include refid="TABLE_NAME"/>
+		<![CDATA[SET yn=-1,modify_time=NOW()]]>
+		<include refid="WHERE"/>
+	</update>
+	<!-- 其他业务逻辑SQL -->
+	<!--通过用户ID获取角色名称-->
+	<select id="queryRoleNameByUsrIds" parameterType="java.lang.reflect.Array" resultType="Map">
+		<![CDATA[SELECT  tr.role_name AS roleName,tur.usr_id AS usrId,tr.id AS roleId  FROM t_role tr,t_usr_role tur WHERE tur.yn = 1 AND tr.yn = 1 AND tur.role_id = tr.id AND tur.usr_id IN ]]>
+		<foreach collection="array" item="usrId" open="(" separator="," close=")">
+			<![CDATA[#{usrId}]]>
+		</foreach>
+	</select>
+	<select id="queryUsrRoleByRoleIds" parameterType="java.lang.reflect.Array" resultType="Map">
+		<![CDATA[SELECT  tr.role_name AS roleName,tur.usr_id AS usrId,tr.id AS roleId  FROM t_role tr,t_usr_role tur WHERE tur.yn = 1 AND tr.yn = 1 AND tur.role_id = tr.id AND tur.role_id IN ]]>
+		<foreach collection="array" item="roleId" open="(" separator="," close=")">
+			<![CDATA[#{roleId}]]>
+		</foreach>
+	</select>
+
+	<!--增加用户和角色-->
+	<insert id="addUsrRole" parameterType="Map">
+		<![CDATA[INSERT INTO t_usr_role(`usr_id`,`role_id`)VALUES(#{usrId},#{roleId}) ON DUPLICATE KEY UPDATE yn = 1,modify_time = NOW()]]>
+	</insert>
+	<!--通过角色ID删除数据-->
+	<update id="delUsrRoleByRoleIds" parameterType="java.lang.reflect.Array">
+		<![CDATA[UPDATE t_usr_role SET yn = -1,modify_time = NOW() WHERE yn = 1 AND role_id IN ]]>
+		<foreach collection="array" item="roleId" open="(" separator="," close=")">
+			<![CDATA[#{roleId}]]>
+		</foreach>
+	</update>
+	<!--通过用户ID删除数据-->
+	<update id="delUsrRoleByUsrIds" parameterType="java.lang.reflect.Array">
+		<![CDATA[UPDATE t_usr_role SET yn = -1,modify_time = NOW() WHERE yn = 1 AND usr_id IN ]]>
+		<foreach collection="array" item="usrId" open="(" separator="," close=")">
+			<![CDATA[#{usrId}]]>
+		</foreach>
+	</update>
+
+</mapper>
