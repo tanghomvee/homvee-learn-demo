@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapping PUBLIC "-//EXOLAB/Castor Mapping DTD Version 1.0//EN" "http://castor.org/mapping.dtd">
+<mapping>
+    <class name="com.dmall.homvee.dao.domain.Vender">
+        <map-to xml="Vender"/>
+        <field name="id" type="long">
+            <bind-xml name="id" node="element"/>
+        </field>
+        <field name="yn" type="integer">
+            <bind-xml name="yn" node="element"/>
+        </field>
+        <field name="venderName" type="string">
+            <bind-xml name="venderName" node="element"/>
+        </field>
+
+        <field name="createTime" type="java.util.Date">
+            <bind-xml name="createTime" node="element"/>
+        </field>
+        <field name="modifyTime" type="java.util.Date">
+            <bind-xml name="modifyTime" node="element"/>
+        </field>
+    </class>
+</mapping>

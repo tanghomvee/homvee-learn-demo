@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.water.dao.employee.EmployeeDao" >
+	<!-- 查询列 -->
+	<sql id="QUERY_COLUMN">
+		<![CDATA[
+		  id                 AS id,
+		  emp_name AS  empName,
+		  emp_mp AS  empMp,
+     	  station_id AS stationId;
+		  creation_time      AS creationTime,
+		  modification_time  AS modificationTime,
+		  valid              AS valid
+		]]>
+	</sql>
+	
+	<sql id="TABLE_NAME"><![CDATA[t_employee]]></sql>
+	<!-- 查询表 -->
+	<sql id="FROM_TABLE">
+		<![CDATA[FROM]]>
+		<include refid="TABLE_NAME"/>
+	</sql>
+	<!-- 全部条件 -->
+	<sql id="WHERE">
+		<where>
+			<![CDATA[AND valid = 1]]>
+			<if test="id != null and id != ''"><![CDATA[AND id = #{id}]]></if>
+			<if test="empName != null and empName != ''"><![CDATA[AND emp_name = #{empName}]]></if>
+			<if test="empMp != null and empMp != ''"><![CDATA[AND emp_mp = #{empMp}]]></if>
+			<if test="creationTime != null and creationTime != ''"><![CDATA[AND date(creation_time) = date(#{creationTime})]]></if>
+			<if test="modificationTime != null and modificationTime != ''"><![CDATA[AND date(modification_time) = date(#{modificationTime})]]></if>
+		</where>
+	</sql>
+	<!-- 更新列字段,只要不为NULL则更新,除开主键列 -->
+	<sql id="SET">
+		<set>
+			<![CDATA[modification_time = now(),]]>
+			<if test="empName != null and empName != ''"><![CDATA[ emp_name = #{empName}]]></if>
+			<if test="empMp != null and empMp != ''"><![CDATA[ emp_mp = #{empMp}]]></if>
+			<if test="valid == 1 or valid==0"><![CDATA[valid = #{valid}]]></if>
+		</set>
+	</sql>
+	<!-- 基础逻辑SQL -->
+	<!-- 保存数据 -->
+	<insert id="saveEntry" parameterType="java.lang.reflect.Array">
+		<![CDATA[INSERT INTO]]>
+		<include refid="TABLE_NAME"/>
+		<![CDATA[(emp_name,emp_mp) VALUES]]>
+		<foreach collection="array" item="item" index="index" separator="," >
+			<![CDATA[(#{item.empName},#{item.empMp})]]>
+		</foreach>
+	</insert>
+	<!-- 通过主键删除数据 -->
+	<delete id="deleteByKey" parameterType="java.lang.reflect.Array">
+		<![CDATA[DELETE]]> 
+		<include refid="FROM_TABLE"/>
+		<![CDATA[WHERE id IN]]>
+		<foreach collection="array" item="id" open="(" separator="," close=")">
+			<![CDATA[#{id}]]>
+		</foreach>
+	</delete>
+	<!-- 通过条件删除数据 -->
+	<delete id="deleteByCondition" parameterType="Employee">
+		<![CDATA[DELETE]]> 
+		<include refid="FROM_TABLE"/>
+		<include refid="WHERE"/>
+	</delete>
+	<!-- 通过主键修改数据 -->
+	<update id="modifyByKey" parameterType="Employee">
+		<![CDATA[UPDATE]]> 
+		<include refid="TABLE_NAME"/>
+		<include refid="SET"/>
+		<![CDATA[WHERE valid=1 AND id=#{id}]]>
+	</update>
+	<!-- 按主键 查询对象 -->
+	<select id="queryEntryListByKey" parameterType="java.lang.reflect.Array" resultType="Employee">
+		<![CDATA[SELECT]]>
+		<include refid="QUERY_COLUMN"/>
+		<include refid="FROM_TABLE"/>
+		<![CDATA[WHERE valid=1 and id IN ]]>
+		<foreach collection="array" item="id" open="(" separator="," close=")">
+			<![CDATA[#{id}]]>
+		</foreach>
+	</select>
+	<!-- 按条件 查询对象 -->
+	<select id="queryEntryListByCondition" parameterType="Employee" resultType="Employee">
+		<![CDATA[SELECT]]>
+		<include refid="QUERY_COLUMN"/>
+		<include refid="FROM_TABLE"/>
+		<include refid="WHERE"/>
+	</select>
+	<!-- 按条件 查询对象个数 -->
+	<select id="queryEntryListCntByCondition" parameterType="Employee" resultType="int">
+		<![CDATA[SELECT]]>
+		<include refid="QUERY_COLUMN"/>
+		<include refid="FROM_TABLE"/>
+		<include refid="WHERE"/>
+	</select>
+	<!-- 通过主键数组,逻辑删除数据 -->
+	<update id="logicDelByKey" parameterType="java.lang.reflect.Array" >
+		<![CDATA[UPDATE]]>
+		<include refid="TABLE_NAME"/>
+		<![CDATA[SET valid=0,modification_time=NOW()]]>
+		<![CDATA[WHERE valid=1 AND id IN]]>
+		<foreach collection="array" item="id" open="(" separator="," close=")">
+			<![CDATA[#{id}]]>
+		</foreach>
+	</update>
+	<!-- 通过条件,逻辑删除数据 -->
+	<update id="logicDelByCondition" parameterType="Employee" >
+		<![CDATA[UPDATE]]>
+		<include refid="TABLE_NAME"/>
+		<![CDATA[SET valid=0,modification_time=NOW()]]>
+		<include refid="WHERE"/>
+	</update>
+	<!-- 其他业务逻辑SQL -->
+	
+</mapper>
