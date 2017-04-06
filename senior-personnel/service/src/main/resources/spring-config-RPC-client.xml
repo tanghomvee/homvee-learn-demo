@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans	http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd"
+       default-autowire="byName">
+
+   <!--  Hessian客户端配置 START-->
+    <bean id="hessianServiceClient" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+       <property name="serviceUrl" value="http://192.168.8.2/hessianService"/>
+       <property name="serviceInterface" value="com.zlt.seniorpersonnel.service.rpc.HessianService"/>
+       <property name="debug" value="true"/>
+    </bean>
+   <!--  Hessian客户端配置 END-->
+
+   <!--  Dubbo客户端配置 START-->
+   <!-- 消费方应用名，用于计算依赖关系，不是匹配条件，不要与提供方一样 -->  
+    <dubbo:application name="seniorpersonnel-dubbo-service-consumer" />
+    <!--直连方式访问: 生成远程服务代理，可以像使用本地bean一样使用demoService -->  
+    <dubbo:reference id="dubboServiceClient" interface="com.zlt.seniorpersonnel.service.rpc.DubboService" check="false" timeout="10000" url="dubbo://192.168.8.2:20880" registry="N/A"/>
+    
+    <!-- 下面是通过zookeeper注册中心暴露的服务地址访问-->
+    <!-- <dubbo:registry address="multicast://224.5.6.7:1234" /> -->  
+    <!-- <dubbo:registry address="zookeeper://127.0.0.1:2181" />   -->
+   <!--  Dubbo客户端配置 END-->
+ 
+</beans>

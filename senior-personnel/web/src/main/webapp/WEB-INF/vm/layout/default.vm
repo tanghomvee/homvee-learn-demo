@@ -1,0 +1,6 @@
+#set($layout="layout/layout.vm")
+Q:What your name?
+A:My Name is ${request.getParameter("usrName")}<br>
+Server Port: ${request.serverPort}<br>
+$!{viewData},$!{reqData}<br>
+国际化信息： #springMessage("ept_ware_item_num")
